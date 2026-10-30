@@ -20,7 +20,7 @@ type BackEnd struct {
 // Struct này định nghĩa một pool các server
 type ServerPool struct {
 	backends []*BackEnd // Danh sách các server
-	current  int64     // Chỉ số của server hiện tại trong danh sách
+	current  int64      // Chỉ số của server hiện tại trong danh sách
 }
 
 // Thêm một server vào pool
@@ -29,7 +29,7 @@ func (s *ServerPool) AddBackend(backend *BackEnd) {
 }
 
 // Lấy chỉ số của server tiếp theo trong pool
-func (s *ServerPool) NextIndex() int64{
+func (s *ServerPool) NextIndex() int64 {
 	s.current++
 	return s.current % int64(len(s.backends)) // Lấy kết quả của phép chia dư => Áp dụng thuật toán Round Robin để chọn server tiếp theo
 }
@@ -55,7 +55,7 @@ func main() {
 
 	servers := strings.Split(serverList, ",") // Tách danh sách các server thành một mảng các chuỗi
 
-	serverPool := ServerPool{} // Tạo một pool các server
+	serverPool := ServerPool{current: -1} // Tạo một pool các server
 	for _, s := range servers {
 		serverURL, err := url.Parse(s) // Chuyển đổi chuỗi URL thành một đối tượng URL
 		if err != nil {
@@ -75,9 +75,9 @@ func main() {
 
 	// Tạo một server HTTP lắng nghe trên cổng được chỉ định và chuyển tiếp tất cả các request đến server tiếp theo trong pool
 	server := http.Server{
-		Addr: fmt.Sprintf(":%d",port), // Lắng nghe trên cổng được chỉ định
-		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){ // Tạo một handler để xử lý tất cả các request
-			peer := serverPool.GetNextBackend()	// Lấy server tiếp theo trong pool
+		Addr: fmt.Sprintf(":%d", port), // Lắng nghe trên cổng được chỉ định
+		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) { // Tạo một handler để xử lý tất cả các request
+			peer := serverPool.GetNextBackend() // Lấy server tiếp theo trong pool
 
 			if peer != nil {
 				peer.ReverseProxy.ServeHTTP(w, r) // Chuyển tiếp request đến server tiếp theo trong pool
@@ -92,15 +92,4 @@ func main() {
 	if err := server.ListenAndServe(); err != nil {
 		log.Fatal(err)
 	}
-
-	// /*
-	// 	Khi requets gửi đến localhost:3030, nó sẽ được chuyển tiếp đến localhost:8080.
-	// */
-	// u, _ := url.Parse("http://localhost:8080")  // Request sẽ được chuyển vào đây
-	// rp := httputil.NewSingleHostReverseProxy(u) // Tạo một ReverseProxy để chuyển tiếp request đến server
-
-	// // Tạo một server HTTP lắng nghe trên cổng 3030 và chuyển tiếp tất cả các request đến ReverseProxy
-	// http.ListenAndServe(":3030", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	// 	rp.ServeHTTP(w, r)
-	// }))
 }
