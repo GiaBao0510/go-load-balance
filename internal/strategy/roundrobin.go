@@ -7,7 +7,8 @@ import (
 /*
 • Định nghĩa: gửi request lần lượt theo vòng tròn: 1, 2, 3, 1, 2, 3, ...
 • Đặc điểm: không cần biết tải hay cấu hình từng server; trạng thái chỉ là một bộ đếm.
-• Ưu điểm: đơn giản, nhanh, công bằng về số lượng request. Nhược điểm: coi mọi server và mọi request là như nhau; không phù hợp khi server cấu hình khác nhau hoặc request nặng nhẹ chênh lệch lớn.
+• Ưu điểm: đơn giản, nhanh, công bằng về số lượng request. 
+• Nhược điểm: coi mọi server và mọi request là như nhau; không phù hợp khi server cấu hình khác nhau hoặc request nặng nhẹ chênh lệch lớn.
 • Khi nào dùng: cụm server đồng nhất, request có chi phí xấp xỉ nhau.
 */
 type RoundRobin struct {
